@@ -29,8 +29,30 @@ int main()
   bind(listening, (sockaddr*)&hint, sizeof(hint));
 
   // Listen on the socket for a client
+  listen(listening, SOMAXCONN);
 
   // Accept a connection from a client
+  sockaddr_in client;
+  int clientSize{sizeof(client)};
+  SOCKET clientSocket = accept(listening, (sockaddr*)&client, &clientSize);
+
+  if (clientSocket == INVALID_SOCKET) {
+    std::cerr << "Invalid socket! Quitting" << std::endl;
+    return 0;
+  }
+
+  char host[NI_MAXHOST];            // client's remote name
+  char service[NI_MAXSERV];         // Service (i.e. port) the client is connected on
+
+  ZeroMemory(host, NI_MAXHOST);     // same as memset(host, 0, NI_MAXHOST);
+  ZeroMemory(service, NI_MAXSERV);
+
+  if (getnameinfo((sockaddr*)&client, sizeof(client), host, NI_MAXHOST, service, NI_MAXSERV, 0) == 0) {
+    std::cout << host << " connected on port " << service << std::endl;
+  } else {
+    inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
+    std::cout << host << " connected on port " << ntohs(client.sin_port) << std::endl;
+  }
 
   // Close listening socket
 

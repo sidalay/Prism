@@ -55,8 +55,30 @@ int main()
   }
 
   // Close listening socket
+  closesocket(listening);
 
   // While loop: Receive and Send data
+  char buf[4096];
+
+  while (true) {
+    ZeroMemory(buf, 4096);
+
+    // Wait for client to send data
+    int bytesReceived = recv(clientSocket, buf, 4096, 0);
+
+    if (bytesReceived == SOCKET_ERROR) {
+      std::cerr << "Error in recv(). Quitting" << std::endl;
+      break;
+    }
+
+    if (bytesReceived == 0) {
+      std::cout << "Client disconnected" << std::endl;
+      break;
+    }
+
+    // Echo message back to client
+    send(clientSocket, buf, bytesReceived + 1, 0);
+  }
 
   // Close the socket
 
